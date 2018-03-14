@@ -1,1 +1,4 @@
-# Skeleton project for Swagger
+# Identity server
+
+Register new and logins registered users. 
+
