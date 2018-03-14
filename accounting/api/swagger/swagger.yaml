@@ -1,0 +1,90 @@
+swagger: "2.0"
+info:
+  version: "0.1.0"
+  title: Accounting service
+host: localhost:8081
+basePath: /api
+# 
+schemes:
+  - http
+  - https
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /usercreate:
+    x-swagger-router-controller: main_controller
+    post:
+      operationId: createUser
+      description: "Register new user in accounting service"
+      parameters:
+        - name: userInfo
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserInfo"
+      responses:
+        "201":
+          description: "User created"
+          schema:
+            $ref: "#/definitions/Resource"
+        "400":
+          description: "Bad request"
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: "Could not register new user."
+          schema:
+            $ref: "#/definitions/Error"
+  /makegood:
+    x-swagger-router-controller: main_controller
+    get:
+      operationId: makeGood
+      description: "Protected endpoint, gets user's balance"
+      security:
+        - Bearer: []
+      responses:
+        "200":
+          description: "We've made good!"
+          schema:
+            $ref: "#/definitions/Resource"
+        "403":
+          description: "Access denied! Get out!"
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/Error"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+definitions:
+  UserInfo:
+    type: object
+    required:
+      - username
+      - email
+    properties:
+      email:
+        type: string
+        example: "email"
+      username:
+        type: string
+        example: "username"
+  Resource:
+    type: object
+    properties:
+      resource:
+        type: string
+  Error:
+    required:
+      - message
+    properties:
+      message:
+        type: string

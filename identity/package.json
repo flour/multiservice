@@ -1,0 +1,25 @@
+{
+  "name": "identity",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Identity Swagger API Project",
+  "keywords": [],
+  "author": "Vlad Dukhnich",
+  "license": "",
+  "main": "app.js",
+  "dependencies": {
+    "ejs": "^2.5.7",
+    "express": "^4.12.3",
+    "jsonwebtoken": "^8.2.0",
+    "mongoose": "^5.0.10",
+    "swagger-tools": "^0.10.3",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "should": "^7.1.0",
+    "supertest": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/static/shared.js"></script>
+    <title>Yo-Yo!</title>
+</head>
+
+<body>
+    <div class="container" id="container">
+        <div v-if="error" class="row center-block">
+            {{ error }}
+        </div>
+
+        <div v-if="athorized === false" class="row">
+            <div class="col-md-2"></div>
+            <form class="form-signin col-md-3" role="form">
+                <h2 class="form-signin-heading">Please sign in</h2>
+                <input type="text" class="form-control form-control-sm" placeholder="Login" required="required" autofocus="autofocus" v-model="login.username">
+                <input type="password" class="form-control form-control-sm" placeholder="Password" required="required" v-model="login.password">
+                <button v-on:click="makeLogin" class="btn btn-primary btn-block" type="button">Sign in</button>
+            </form>
+            <div class="col-md-2 center-block"></div>
+            <form class="form-signup col-md-3" role="form">
+                <h2 class="form-signup-heading">Sign Up</h2>
+                <input v-model="userInfo.firstname" type="text" class="form-control form-control-sm" placeholder="First name" required="required"
+                    autofocus="autofocus">
+                <input v-model="userInfo.lastname" type="text" class="form-control form-control-sm" placeholder="Last name" required="required"
+                    autofocus="autofocus">
+                <input v-model="userInfo.email" type="email" class="form-control form-control-sm" placeholder="E-mail" required="required"
+                    id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                <input v-model="userInfo.username" type="text" class="form-control form-control-sm" placeholder="Login" required="required"
+                    autofocus="autofocus">
+                <input v-model="userInfo.password" type="password" class="form-control form-control-sm" placeholder="Password" required="required">
+                <button v-on:click="register" class="btn btn-primary btn-block " type="button">Sign up</button>
+            </form>
+
+            <div class="col-md-2"></div>
+        </div>
+        <div v-if="athorized === true" class="row">
+            <br/>
+            <button v-on:click="makeGood" class="btn btn-primary center-block">Make good!</button>
+            <hr/>
+            <div v-if="goodResponse" class="row center-block">
+                Balance: {{ goodResponse.balance }}
+            </div>
+        </div>
+
+        <script>
+            var vm = new Vue({
+                el: "#container",
+                data: {
+                    athorized: false,
+                    error: '',
+                    goodResponse: null,
+                    login: {
+                        username: null,
+                        password: null
+                    },
+                    userInfo: {
+                        firstname: null,
+                        lastname: null,
+                        email: null,
+                        username: null,
+                        password: null
+                    }
+                },
+                methods: {
+                    makeLogin: function () {
+                        vm.error = '';
+                        if (!vm.login.username) {
+                            vm.error = "Login cannot be empty";
+                            return;
+                        }
+                        if (!vm.login.password) {
+                            vm.error = "Password cannot be empty";
+                            return;
+                        }
+                        axios.post('/api/login', {
+                            headers: { 'Content-Type': 'application/json' },
+                            data: vm.login
+                        }).then(function (response) {
+                            addCookie('token', response.data.token);
+                            location.reload();
+                        }).catch(function (error) {
+                            console.log(error);
+                            vm.error = "Could not log in";
+                            vm.login.password = null;
+                        });
+                    },
+                    register: function () {
+                        vm.error = '';
+                        axios.post('/api/register', {
+                            headers: { 'Content-Type': 'application/json' },
+                            data: vm.userInfo
+                        }).then(function (response) {
+                            location.reload();
+                        }).catch(function (error) {
+                            console.log(error);
+                            vm.error = "Could not register";
+                            vm.userInfo.password = null;
+                        });
+                    },
+                    makeGood: function () {
+                        vm.error = vm.goodResponse = '';
+                        axios.get('/api/makegood', {
+                            headers: {
+                                Authorization: 'Bearer ' + getCookie('token')
+                            }
+                        }).then(function (response) {
+                            console.log(response);
+                            vm.goodResponse = response.data;
+                        }).catch(function (error) {
+                            console.log(error);
+                            vm.goodResponse = null;
+                            vm.error = "Could not make good";
+                        });
+                    }
+                },
+                created: function () {
+                    axios.get('/api/protected', { headers: { Authorization: 'Bearer ' + getCookie('token') } })
+                        .then(function (response) {
+                            vm.athorized = true;
+                        })
+                        .catch(function (error) {
+                            vm.athorized = false;
+                        });
+                }
+            })
+        </script>
+    </div>
+
+</body>
+
+</html>
